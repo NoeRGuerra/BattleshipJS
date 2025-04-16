@@ -1,7 +1,6 @@
 const Ship = require("./Ship");
-console.log(`Ship: ${Ship}`);
 
-describe("Ship", () => {
+describe("Ship tests", () => {
   let ship;
 
   beforeEach(() => {

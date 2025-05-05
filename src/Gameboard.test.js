@@ -108,4 +108,38 @@ describe("Gameboard tests", () => {
     gameboard.receiveAttack(shipData.coords);
     expect(gameboard.receiveAttack(shipData.coords)).toBe(false);
   })
+
+  test("Check that all the ships are sunk", () => {
+    const firstShipData = {
+      length: 3,
+      coords: [2,2],
+      orientation: 'horizontal'
+    };
+    const secondShipData = {
+      length: 2,
+      coords: [1,1],
+      orientation: 'horizontal'
+    };
+    const thirdShipData = {
+      length: 1,
+      coords: [3,3],
+      orientation: 'horizontal'
+    };
+
+    gameboard.placeShip(firstShipData.coords, firstShipData.orientation, firstShipData.length);
+    gameboard.placeShip(secondShipData.coords, secondShipData.orientation, secondShipData.length);
+    gameboard.placeShip(thirdShipData.coords, thirdShipData.orientation, thirdShipData.length);
+
+    gameboard.receiveAttack([2,2]);
+    gameboard.receiveAttack([2,3]);
+    gameboard.receiveAttack([2,4]);
+    expect(gameboard.areAllShipsSunk()).toBe(false);
+
+    gameboard.receiveAttack([1,1]);
+    gameboard.receiveAttack([1,2]);
+    expect(gameboard.areAllShipsSunk()).toBe(false);
+
+    gameboard.receiveAttack([3,3]);
+    expect(gameboard.areAllShipsSunk()).toBe(true);
+  })
 });

@@ -6,6 +6,7 @@ class Gameboard {
     this.board = this.createBoard(this.size);
     this.ships = [];
     this.attackedCoordinates = [];
+    this.missedAttacks = [];
   }
 
   placeShip(coordinates, orientation, length) {
@@ -93,9 +94,16 @@ class Gameboard {
     if (this.board[row][column] instanceof Ship) {
       const ship = this.board[row][column];
       ship.hit();
+    } else {
+      console.log("Missed!");
+      this.missedAttacks.push(coordinates);
     }
     this.attackedCoordinates.push(coordinates);
     return true;
+  }
+
+  areAllShipsSunk() {
+    return this.ships.every(ship => ship.isSunk() === true);
   }
 }
 

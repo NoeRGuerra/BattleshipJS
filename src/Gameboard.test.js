@@ -1,10 +1,13 @@
 const Gameboard = module.require("./Gameboard");
+const Ship = module.require("./Ship");
 
 describe("Gameboard tests", () => {
+  const boardWidth = 5;
+  const boardHeight = 5;
   let gameboard;
 
   beforeEach(() => {
-    gameboard = new Gameboard(10, 10);
+    gameboard = new Gameboard(boardWidth, boardHeight);
   });
 
   test("Check that board exists after creation", () => {
@@ -19,18 +22,25 @@ describe("Gameboard tests", () => {
   })
 
   test("Check that board has a size", () => {
-    expect(gameboard.size).toEqual([10,10]);
+    expect(gameboard.size).toEqual([boardWidth, boardHeight]);
   });
 
   test("Check that ships can be placed", () => {
+    const shipLength = 3;
+    const startCoords = [2,2];
+    const shipOrientation = "horizontal";
+
+    gameboard.placeShip(startCoords, shipOrientation, shipLength);
+    let ship = gameboard.ships[0];
+    expect(ship.length).toEqual(shipLength);
+    
     const expectedBoard = [
-      ['-', '-', '-', '-', 'x'],
-      ['-', '-', '-', '-', 'x'],
-      ['-', '-', '-', '-', 'x'],
-      ['-', '-', '-', '-', 'x'],
-      ['-', '-', '-', '-', 'x'],
+      ['-', '-', '-', '-', '-'],
+      ['-', '-', '-', '-', '-'],
+      ['-', '-', ship, ship, ship],
+      ['-', '-', '-', '-', '-'],
+      ['-', '-', '-', '-', '-'],
     ]
-    gameboard.placeShip([5, 5], "horizontal", 5);
     expect(gameboard.board).toEqual(expectedBoard);
   })
   

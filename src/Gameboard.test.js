@@ -25,7 +25,7 @@ describe("Gameboard tests", () => {
     expect(gameboard.size).toEqual([boardWidth, boardHeight]);
   });
 
-  test("Check that ships can be placed", () => {
+  test("Check that ships can be placed horizontally", () => {
     const shipLength = 3;
     const startCoords = [2,2];
     const shipOrientation = "horizontal";
@@ -41,6 +41,28 @@ describe("Gameboard tests", () => {
       ['-', '-', '-', '-', '-'],
       ['-', '-', '-', '-', '-'],
     ]
+    expect(gameboard.board).toEqual(expectedBoard);
+  })
+
+  test("Check that ships can be placed vertically", () => {
+    const shipLength = 3;
+    const startCoords = [1,2];
+    const shipOrientation = "vertical";
+
+    gameboard.placeShip(startCoords, shipOrientation, shipLength);
+    let ship = gameboard.ships[0];
+    expect(ship.length).toEqual(shipLength);
+    
+    const expectedBoard = [
+      ['-', '-', '-', '-', '-'],
+      ['-', '-', ship, '-', '-'],
+      ['-', '-', ship, '-', '-'],
+      ['-', '-', ship, '-', '-'],
+      ['-', '-', '-', '-', '-'],
+    ]
+    console.log("Actual Board:", gameboard.board);
+    console.log("Expected Board:", expectedBoard);
+
     expect(gameboard.board).toEqual(expectedBoard);
   })
   

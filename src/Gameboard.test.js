@@ -78,6 +78,34 @@ describe("Gameboard tests", () => {
 
     expect(gameboard.placeShip(firstShipData.coords, firstShipData.orientation, firstShipData.length)).toBe(true);
     expect(gameboard.placeShip(secondShipData.coords, secondShipData.orientation, secondShipData.length)).toBe(false);
-    console.log(gameboard.board);
+  })
+
+  test("Check that ships can be hit and sunk", () => {
+    const shipData = {
+      length: 3,
+      coords: [2,2],
+      orientation: 'horizontal'
+    };
+
+    gameboard.placeShip(shipData.coords, shipData.orientation, shipData.length);
+    let ship = gameboard.ships[0];
+    gameboard.receiveAttack(shipData.coords);
+    shipData.coords = [2,3]
+    gameboard.receiveAttack(shipData.coords);
+    shipData.coords = [2,4]
+    gameboard.receiveAttack(shipData.coords);
+    expect(ship.isSunk()).toBe(true);
+  })
+
+  test("Check that you can't attack the same coordinates twice", () => {
+    const shipData = {
+      length: 3,
+      coords: [2,2],
+      orientation: 'horizontal'
+    };
+
+    gameboard.placeShip(shipData.coords, shipData.orientation, shipData.length);
+    gameboard.receiveAttack(shipData.coords);
+    expect(gameboard.receiveAttack(shipData.coords)).toBe(false);
   })
 });

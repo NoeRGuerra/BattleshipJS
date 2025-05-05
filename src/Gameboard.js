@@ -5,6 +5,7 @@ class Gameboard {
     this.size = [width, height];
     this.board = this.createBoard(this.size);
     this.ships = [];
+    this.attackedCoordinates = [];
   }
 
   placeShip(coordinates, orientation, length) {
@@ -23,7 +24,7 @@ class Gameboard {
       console.log("Ship placement invalid");
       return false;
     }
-    if (!this.checkCoordinates(coordinates, length, orientation)){
+    if (!this.checkCoordinates(coordinates, length, orientation)) {
       console.log("Ship overlaps with another ship");
       return false;
     }
@@ -62,22 +63,39 @@ class Gameboard {
   }
 
   createBoard(size) {
-    console.log("Creating board...");
     return Array.from({ length: size[1] }, () => Array(size[0]).fill('-'));
   }
 
   printBoard() {
     let board = "";
     for (let row of this.board) {
-      board = board.concat(row.join(" "));
-      board = board.concat("\n");
+      const rowDisplay = []
+      for (let cell of row) {
+        if (cell instanceof Ship) {
+          rowDisplay.push(" S ");
+        } else {
+          rowDisplay.push(" - ");
+        }
+      }
+      board = board + rowDisplay.join(" ") + "\n";
     }
     console.log("BOARD:");
     console.log(board);
   }
 
   receiveAttack(coordinates) {
-
+    for (let coord of this.attackedCoordinates) {
+      if (coord.toString() == coordinates.toString()) {
+        return false;
+      }
+    }
+    const [row, column] = coordinates;
+    if (this.board[row][column] instanceof Ship) {
+      const ship = this.board[row][column];
+      ship.hit();
+    }
+    this.attackedCoordinates.push(coordinates);
+    return true;
   }
 }
 

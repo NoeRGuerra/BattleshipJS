@@ -60,10 +60,24 @@ describe("Gameboard tests", () => {
       ['-', '-', ship, '-', '-'],
       ['-', '-', '-', '-', '-'],
     ]
-    console.log("Actual Board:", gameboard.board);
-    console.log("Expected Board:", expectedBoard);
 
     expect(gameboard.board).toEqual(expectedBoard);
   })
   
+  test("Check that ships can't overlap", () => {
+    const firstShipData = {
+      length: 3,
+      coords: [2,2],
+      orientation: 'horizontal'
+    };
+    const secondShipData = {
+      length: 2,
+      coords: [1,2],
+      orientation: 'vertical'
+    };
+
+    expect(gameboard.placeShip(firstShipData.coords, firstShipData.orientation, firstShipData.length)).toBe(true);
+    expect(gameboard.placeShip(secondShipData.coords, secondShipData.orientation, secondShipData.length)).toBe(false);
+    console.log(gameboard.board);
+  })
 });

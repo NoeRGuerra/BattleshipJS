@@ -27,4 +27,19 @@ describe("Ship tests", () => {
     ship.hit();
     expect(ship.isSunk()).toBe(true);
   });
+
+  test("Check that ship is not sunk if it doesn't receive enough hits", () => {
+    ship.hit();
+    ship.hit()
+    expect(ship.isSunk()).toBe(false);
+  });
+
+  test("Check that ship is sunk if hits exceed length", () => {
+    ship.hit();
+    ship.hit();
+    ship.hit();
+    ship.hit();
+    ship.hit();
+    expect(ship.isSunk()).toBe(true);
+  });
 });

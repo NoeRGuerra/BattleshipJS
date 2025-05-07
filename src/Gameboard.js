@@ -84,16 +84,25 @@ class Gameboard {
     console.log(board);
   }
 
+  areCoordinatesEqual(coord1, coord2) {
+    if (!Array.isArray(coord1) || !Array.isArray(coord2) || coord1.length != 2 || coord2.length != 2) {
+      return false;
+    }
+    return coord1[0] == coord2[0] && coord1[1] == coord2[1];
+  }
+
   receiveAttack(coordinates) {
-    if (coordinates[0] > this.size[0] || coordinates[1] > this.size[1]){
+    const [row, column] = coordinates;
+    if (row >= this.size[1] || column >= this.size[0] || row < 0 || column < 0){
+      console.log("Attack coordinates are out of bounds");
       return false; // Out of bounds
     }
-    for (let coord of this.attackedCoordinates) {
-      if (coord.toString() == coordinates.toString()) { // Check if coordinates exist in this.attackedCoordinates
+    for (let i = 0; i < this.attackedCoordinates.length; i++) {
+      if (this.areCoordinatesEqual(this.attackedCoordinates[i], coordinates)){
+        console.log("Attack coordinates repeated");
         return false;
       }
     }
-    const [row, column] = coordinates;
     if (this.board[row][column] instanceof Ship) {
       const ship = this.board[row][column];
       ship.hit();
@@ -106,6 +115,9 @@ class Gameboard {
   }
 
   areAllShipsSunk() {
+    if (this.ships.length == 0) {
+      return false;
+    }
     return this.ships.every(ship => ship.isSunk() === true);
   }
 }

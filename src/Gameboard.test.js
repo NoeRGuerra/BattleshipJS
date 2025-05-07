@@ -65,7 +65,7 @@ describe("Gameboard tests", () => {
       expect(gameboard.board).toEqual(expectedBoard);
     })
 
-    test("should allow placing multiple non-overlapping ships", () => {
+    test("should not allow placing overlapping ships", () => {
       const firstShipData = {
         length: 3,
         coords: [2, 2],
@@ -79,6 +79,16 @@ describe("Gameboard tests", () => {
 
       expect(gameboard.placeShip(firstShipData.coords, firstShipData.orientation, firstShipData.length)).toBe(true);
       expect(gameboard.placeShip(secondShipData.coords, secondShipData.orientation, secondShipData.length)).toBe(false);
+    });
+
+    test('should not allow placement that exactly covers an existing ship', () => {
+      gameboard.placeShip([2, 2], 'horizontal', 3);
+      expect(gameboard.placeShip([2, 2], 'horizontal', 3)).toBe(false);
+    });
+
+    test('should not allow placing an overlapping ship that is partially off-board', () => {
+      gameboard.placeShip([2, 2], 'horizontal', 3);
+      expect(gameboard.placeShip([-1, -1], 'horizontal', 4)).toBe(false);
     })
 
     test('should not allow placing ships of length zero', () => {
@@ -99,15 +109,75 @@ describe("Gameboard tests", () => {
       expect(gameboard.placeShip(['1', '3'], 'horizontal', 2)).toBe(false);
     });
 
-
     test("should not allow placing ships larger than the board", () => {
       expect(gameboard.placeShip([2, 2], 'horizontal', 7)).toBe(false);
       expect(gameboard.placeShip([0, 0], 'horizontal', 6)).toBe(false);
       expect(gameboard.placeShip([-1, 3], 'horizontal', -2)).toBe(false);
     });
+
+    test("should place a ship of length 1 at any valid coordinate", () => {
+      expect(gameboard.placeShip([2, 4], 'horizontal', 1)).toBe(true);
+    });
+
+    test('should not allow horizontal placement on last column if ship length > 1', () => {
+      expect(gameboard.placeShip([boardWidth - 1, boardHeight - 1], 'horizontal', 2)).toBe(false);
+    });
+
+    test('should not allow vertical placement on last row if ship length > 1', () => {
+      expect(gameboard.placeShip([boardWidth - 1, boardHeight - 1], 'vertical', 2)).toBe(false);
+    });
   })
 
   describe('receiveAttack() method', () => {
+    test('should return true for successful attacks', () => {
+      gameboard.placeShip([2, 2], 'horizontal', 3);
+      expect(gameboard.receiveAttack([2, 2])).toBe(true);
+    });
+
+    test('should return true for missed attacks', () => {
+      gameboard.placeShip([2, 2], 'horizontal', 3);
+      expect(gameboard.receiveAttack([1, 2])).toBe(true);
+    });
+
+    test('should return false for repeated hits', () => {
+      gameboard.placeShip([2, 2], 'horizontal', 3);
+      gameboard.receiveAttack([2, 2]);
+      expect(gameboard.receiveAttack([2, 2])).toBe(false);
+    })
+
+    test('should return false for repeated misses', () => {
+      gameboard.placeShip([2, 2], 'horizontal', 3);
+      gameboard.receiveAttack([1, 2]);
+      expect(gameboard.receiveAttack([1, 2])).toBe(false);
+    })
+
+
+    test('should return false for attacks out of bouds', () => {
+      gameboard.placeShip([2, 2], 'horizontal', 3);
+      expect(gameboard.receiveAttack([5, 5])).toBe(false);
+    })
+
+    test('should increment hit count when hitting the first segment of a ship', () => {
+      gameboard.placeShip([2, 2], 'horizontal', 3);
+      gameboard.receiveAttack([2, 2]);
+      const ship = gameboard.ships[0];
+      expect(ship.hits).toBe(1);
+    });
+
+    test('should increment hit count when hitting the middle segment of a ship', () => {
+      gameboard.placeShip([2, 2], 'horizontal', 3);
+      gameboard.receiveAttack([2, 3]);
+      const ship = gameboard.ships[0];
+      expect(ship.hits).toBe(1);
+    });
+
+    test('should increment hit count when hitting the last segment of a ship', () => {
+      gameboard.placeShip([2, 2], 'horizontal', 3);
+      gameboard.receiveAttack([2, 4]);
+      const ship = gameboard.ships[0];
+      expect(ship.hits).toBe(1);
+    });
+
     test("should allow to sink ships", () => {
       gameboard.placeShip([2, 2], 'horizontal', 3);
       let ship = gameboard.ships[0];
@@ -160,8 +230,40 @@ describe("Gameboard tests", () => {
     })
   })
 
-  describe("Game Over logic", () => {
-    test("should report when all ships are sunk", () => {
+  describe("Recording attacks", () => {
+    test("should record coordinates of successful attack", () => {
+      gameboard.placeShip([2,2], 'horizontal', 3);
+      gameboard.receiveAttack([2,2]);
+      expect(gameboard.attackedCoordinates).toEqual([[2,2]]);
+    });
+
+    test("should record coordinates of missed attack", () => {
+      gameboard.placeShip([2,2], 'horizontal', 3);
+      gameboard.receiveAttack([2,1]);
+      expect(gameboard.attackedCoordinates).toEqual([[2,1]]);
+      expect(gameboard.missedAttacks).toEqual([[2,1]]);
+    });
+
+    test('should not record repeated hits', () => {
+      gameboard.placeShip([2,2], 'horizontal', 3);
+      gameboard.receiveAttack([2,2]);
+      gameboard.receiveAttack([2,2]);
+      gameboard.receiveAttack([2,2]);
+      expect(gameboard.attackedCoordinates).toEqual([[2,2]]);
+    });
+
+
+    test('should not record repeated misses', () => {
+      gameboard.placeShip([2,2], 'horizontal', 3);
+      gameboard.receiveAttack([2,1]);
+      gameboard.receiveAttack([2,1]);
+      gameboard.receiveAttack([2,1]);
+      expect(gameboard.attackedCoordinates).toEqual([[2,1]]);
+    })
+  })
+
+  describe("areAllShipsSunk() method", () => {
+    test("should return true when all ships are sunk", () => {
       const firstShipData = {
         length: 3,
         coords: [2, 2],
@@ -185,14 +287,72 @@ describe("Gameboard tests", () => {
       gameboard.receiveAttack([2, 2]);
       gameboard.receiveAttack([2, 3]);
       gameboard.receiveAttack([2, 4]);
-      expect(gameboard.areAllShipsSunk()).toBe(false);
 
       gameboard.receiveAttack([1, 1]);
       gameboard.receiveAttack([1, 2]);
-      expect(gameboard.areAllShipsSunk()).toBe(false);
-
+      
       gameboard.receiveAttack([3, 3]);
       expect(gameboard.areAllShipsSunk()).toBe(true);
+    });
+
+    test("should return false if not all ships are sunk", () => {
+      const firstShipData = {
+        length: 3,
+        coords: [2, 2],
+        orientation: 'horizontal'
+      };
+      const secondShipData = {
+        length: 2,
+        coords: [1, 1],
+        orientation: 'horizontal'
+      };
+      const thirdShipData = {
+        length: 1,
+        coords: [3, 3],
+        orientation: 'horizontal'
+      };
+
+      gameboard.placeShip(firstShipData.coords, firstShipData.orientation, firstShipData.length);
+      gameboard.placeShip(secondShipData.coords, secondShipData.orientation, secondShipData.length);
+      gameboard.placeShip(thirdShipData.coords, thirdShipData.orientation, thirdShipData.length);
+
+      gameboard.receiveAttack([2, 2]);
+      gameboard.receiveAttack([2, 4]);
+
+      gameboard.receiveAttack([1, 1]);
+      gameboard.receiveAttack([1, 2]);
+      
+      gameboard.receiveAttack([3, 3]);
+      expect(gameboard.areAllShipsSunk()).toBe(false);
+    });
+
+    test('should return false if no ships are placed', () => {
+      expect(gameboard.areAllShipsSunk()).toBe(false);
+    });
+
+
+    test('should return false if ships are placed, but none are hit', () => {
+      const firstShipData = {
+        length: 3,
+        coords: [2, 2],
+        orientation: 'horizontal'
+      };
+      const secondShipData = {
+        length: 2,
+        coords: [1, 1],
+        orientation: 'horizontal'
+      };
+      const thirdShipData = {
+        length: 1,
+        coords: [3, 3],
+        orientation: 'horizontal'
+      };
+
+      gameboard.placeShip(firstShipData.coords, firstShipData.orientation, firstShipData.length);
+      gameboard.placeShip(secondShipData.coords, secondShipData.orientation, secondShipData.length);
+      gameboard.placeShip(thirdShipData.coords, thirdShipData.orientation, thirdShipData.length);
+
+      expect(gameboard.areAllShipsSunk()).toBe(false);
     })
   })
 });

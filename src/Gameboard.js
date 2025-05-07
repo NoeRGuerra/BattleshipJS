@@ -85,8 +85,11 @@ class Gameboard {
   }
 
   receiveAttack(coordinates) {
+    if (coordinates[0] > this.size[0] || coordinates[1] > this.size[1]){
+      return false; // Out of bounds
+    }
     for (let coord of this.attackedCoordinates) {
-      if (coord.toString() == coordinates.toString()) {
+      if (coord.toString() == coordinates.toString()) { // Check if coordinates exist in this.attackedCoordinates
         return false;
       }
     }

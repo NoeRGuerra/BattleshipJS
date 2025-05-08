@@ -1,3 +1,29 @@
 body {
-  background-color: rebeccapurple;
+  background-color: rgb(43, 43, 43);
+}
+
+h1 {
+  color: white;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#boards-container {
+  display: flex;
+  gap: 20px;
+  justify-content: space-around;
+}
+
+table {
+  border: 1px solid white;
+}
+
+td {
+  border: 1px solid white;
+  height: 40px;
+  width: 40px;
+}
+
+td:hover {
+  background-color: rgba(255, 255, 255, 0.25);
 }

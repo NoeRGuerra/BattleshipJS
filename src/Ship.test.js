@@ -7,39 +7,51 @@ describe("Ship tests", () => {
     ship = new Ship(4);
   });
 
-  test("Check that the ship has a length", () => {
+  test("should set the correct length for the ship", () => {
     expect(ship.length).toBe(4);
   });
 
-  test("Check that the ship is not sunk after creating", () => {
-    expect(ship.isSunk()).toBe(false);
-  });
+  test('should set the correct hits for a newly created ship', () => {
+    expect(ship.hits).toBe(0);
+  })
 
-  test("Check that the ship can be hit", () => {
+  test("should increase hit counter when calling hit()", () => {
     ship.hit();
     expect(ship.hits).toBe(1);
   });
 
-  test("Check that the ship can be sunk", () => {
-    ship.hit();
-    ship.hit();
-    ship.hit();
-    ship.hit();
-    expect(ship.isSunk()).toBe(true);
-  });
+  describe('isSunk() method', () => {
+    test("should return false initially", () => {
+      expect(ship.isSunk()).toBe(false);
+    });
 
-  test("Check that ship is not sunk if it doesn't receive enough hits", () => {
-    ship.hit();
-    ship.hit()
-    expect(ship.isSunk()).toBe(false);
-  });
+    test("should return true if hits are equal to ship's length", () => {
+      ship.hit();
+      ship.hit();
+      ship.hit();
+      ship.hit();
+      expect(ship.isSunk()).toBe(true);
+    });
 
-  test("Check that ship is sunk if hits exceed length", () => {
-    ship.hit();
-    ship.hit();
-    ship.hit();
-    ship.hit();
-    ship.hit();
-    expect(ship.isSunk()).toBe(true);
-  });
+    test("should return false if hits are less than ship's length", () => {
+      ship.hit();
+      ship.hit()
+      expect(ship.isSunk()).toBe(false);
+    });
+
+    test("should return true if ship is hit after being sunk", () => {
+      ship.hit();
+      ship.hit();
+      ship.hit();
+      ship.hit();
+      ship.hit();
+      expect(ship.isSunk()).toBe(true);
+    });
+
+    test('should be sunk after one hit if length is 1', () => {
+      ship = new Ship(1);
+      ship.hit();
+      expect(ship.isSunk()).toBe(true);
+    })
+  })
 });

@@ -12,65 +12,93 @@ class Gameboard {
   placeShip(coordinates, orientation, length) {
     const ship = new Ship(length);
     const [row, column] = coordinates;
-    if ((orientation == "horizontal" && length > this.size[0]) || (orientation == "vertical" && length > this.size[1] || length < 1)) { // Check if ship is bigger than map
-      console.log("Ship can't be larger than board");
-      return false;
+    if (typeof length !== "number" || Number.isInteger(length) === false) {
+      return "invalid_length_type";
     }
-    else if (row < 0 || row > this.size[1] - 1 || column < 0 || column > this.size[0] - 1) { // Check if coordinates are outside map bounds
-      console.log("Ship can't be placed outside board");
-      return false;
+    if (
+      !Array.isArray(coordinates) ||
+      coordinates.length !== 2 ||
+      typeof coordinates[0] !== "number" ||
+      typeof coordinates[1] !== "number"
+    ) {
+      return "invalid_coordinates";
     }
-    else if ((orientation == "horizontal" && (coordinates[1] + length > this.size[0])) ||
-      (orientation == "vertical" && (coordinates[0] + length > this.size[1]))) { // Check if ship fits in the map at current coordinates
-      console.log("Ship placement invalid");
-      return false;
+    if (
+      typeof orientation !== "string" ||
+      !["horizontal", "vertical"].includes(orientation)
+    ) {
+      return "invalid_orientation";
+    }
+    if (
+      (orientation === "horizontal" && length > this.size[0]) ||
+      (orientation === "vertical" && length > this.size[1]) ||
+      length < 1
+    ) {
+      // Check if ship is bigger than map
+      return "invalid_length";
+    }
+    if (
+      row < 0 ||
+      row > this.size[1] - 1 ||
+      column < 0 ||
+      column > this.size[0] - 1
+    ) {
+      // Check if coordinates are outside map bounds
+      return "out_of_bounds";
+    }
+    if (
+      (orientation === "horizontal" &&
+        coordinates[1] + length > this.size[0]) ||
+      (orientation === "vertical" && coordinates[0] + length > this.size[1])
+    ) {
+      // Check if ship fits in the map at current coordinates
+      return "does_not_fit";
     }
     if (!this.checkCoordinates(coordinates, length, orientation)) {
-      console.log("Ship overlaps with another ship");
-      return false;
+      return "overlap";
     }
 
-    if (orientation == 'horizontal') {
-      for (let i = 0; i < length; i++) {
+    if (orientation === "horizontal") {
+      for (let i = 0; i < length; i += 1) {
         this.board[row][column + i] = ship;
       }
-    } else if (orientation == "vertical") {
-      for (let i = 0; i < length; i++) {
+    } else if (orientation === "vertical") {
+      for (let i = 0; i < length; i += 1) {
         this.board[row + i][column] = ship;
       }
     }
 
     this.ships.push(ship);
-    return true;
+    return "placed";
   }
 
   checkCoordinates(coordinates, length, orientation) {
     // Check if there's a ship in any of the coordinates another ship would take
     const [row, column] = coordinates;
-    if (orientation == 'horizontal') {
-      for (let i = 0; i < length; i++) {
+    if (orientation === "horizontal") {
+      for (let i = 0; i < length; i += 1) {
         if (this.board[row][column + i] instanceof Ship) {
           return false;
-        };
+        }
       }
-    } else if (orientation == "vertical") {
-      for (let i = 0; i < length; i++) {
+    } else if (orientation === "vertical") {
+      for (let i = 0; i < length; i += 1) {
         if (this.board[row + i][column] instanceof Ship) {
           return false;
-        };
+        }
       }
     }
     return true;
   }
 
   createBoard(size) {
-    return Array.from({ length: size[1] }, () => Array(size[0]).fill('-'));
+    return Array.from({ length: size[1] }, () => Array(size[0]).fill("-"));
   }
 
   printBoard() {
     let board = "";
     for (let row of this.board) {
-      const rowDisplay = []
+      const rowDisplay = [];
       for (let cell of row) {
         if (cell instanceof Ship) {
           rowDisplay.push(" S ");
@@ -85,40 +113,53 @@ class Gameboard {
   }
 
   areCoordinatesEqual(coord1, coord2) {
-    if (!Array.isArray(coord1) || !Array.isArray(coord2) || coord1.length != 2 || coord2.length != 2) {
+    if (
+      !Array.isArray(coord1) ||
+      !Array.isArray(coord2) ||
+      coord1.length !== 2 ||
+      coord2.length !== 2
+    ) {
       return false;
     }
-    return coord1[0] == coord2[0] && coord1[1] == coord2[1];
+    return coord1[0] === coord2[0] && coord1[1] === coord2[1];
   }
 
   receiveAttack(coordinates) {
     const [row, column] = coordinates;
-    if (row >= this.size[1] || column >= this.size[0] || row < 0 || column < 0){
-      console.log("Attack coordinates are out of bounds");
-      return false; // Out of bounds
+    if (
+      row >= this.size[1] ||
+      column >= this.size[0] ||
+      row < 0 ||
+      column < 0
+    ) {
+      return "invalid"; // Out of bounds
     }
-    for (let i = 0; i < this.attackedCoordinates.length; i++) {
-      if (this.areCoordinatesEqual(this.attackedCoordinates[i], coordinates)){
-        console.log("Attack coordinates repeated");
-        return false;
+    for (let i = 0; i < this.attackedCoordinates.length; i += 1) {
+      if (this.areCoordinatesEqual(this.attackedCoordinates[i], coordinates)) {
+        return "repeat";
       }
     }
     if (this.board[row][column] instanceof Ship) {
       const ship = this.board[row][column];
       ship.hit();
+      if (ship.isSunk()) {
+        this.attackedCoordinates.push(coordinates);
+        return "sunk";
+      }
     } else {
-      console.log("Missed!");
       this.missedAttacks.push(coordinates);
+      this.attackedCoordinates.push(coordinates);
+      return "miss";
     }
     this.attackedCoordinates.push(coordinates);
-    return true;
+    return "hit";
   }
 
   areAllShipsSunk() {
-    if (this.ships.length == 0) {
+    if (this.ships.length === 0) {
       return false;
     }
-    return this.ships.every(ship => ship.isSunk() === true);
+    return this.ships.every((ship) => ship.isSunk() === true);
   }
 }
 

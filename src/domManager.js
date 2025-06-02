@@ -49,6 +49,19 @@ function createBoard(player, parentContainer, isComputerBoard = false) {
             }
           }
         });
+      } else {
+        // Add event listener to computer's board to receive attacks from user
+        tableCell.addEventListener("click", () => {
+          if (selectedShip) {
+            return;
+          }
+          let coordinates = [row, column];
+          let result = player.gameboard.receiveAttack(coordinates);
+          if (result === "hit" || result === "sunk" || result === "miss") {
+            updateBoard(player, boardTable, isComputerBoard);
+          }
+          player.gameboard.printBoard();
+        });
       }
       tableRow.appendChild(tableCell);
     }
@@ -66,7 +79,7 @@ function updateBoard(player, tableElement, isComputerBoard = false) {
       let cell = tableElement.querySelector(
         `td[data-x="${column}"][data-y="${row}"]`,
       );
-      cell.classList.remove("hit", "miss", "ship"); // Clear styles before applying new
+      cell.classList.remove("hit", "miss", "ship", "sunk"); // Clear styles before applying new
       if (
         missedAttacks.some((coord) => coord[0] === row && coord[1] === column)
       ) {
@@ -76,8 +89,17 @@ function updateBoard(player, tableElement, isComputerBoard = false) {
       ) {
         cell.classList.add("hit");
       }
-      if (playerBoard[row][column] instanceof Ship && !isComputerBoard) {
+      if (
+        playerBoard[row][column] instanceof Ship &&
+        !isComputerBoard &&
+        !playerBoard[row][column].isSunk()
+      ) {
         cell.classList.add("ship");
+      } else if (
+        playerBoard[row][column] instanceof Ship &&
+        playerBoard[row][column].isSunk()
+      ) {
+        cell.classList.add("sunk");
       }
     }
   }

@@ -31,3 +31,15 @@ td:hover {
 .ship {
   background-color: antiquewhite;
 }
+
+.hit {
+  background-color: brown;
+}
+
+.miss {
+  background-color: tomato;
+}
+
+.sunk {
+  background-color: black;
+}

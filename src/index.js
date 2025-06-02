@@ -49,7 +49,7 @@ setPlayersContainers();
 const playerOneContainer = document.querySelector("#player-one-container");
 const playerTwoContainer = document.querySelector("#player-two-container");
 // setupFleet(playerOne, FLEET_DEFINITIONS);
-// setupFleet(playerTwo, FLEET_DEFINITIONS);
+setupFleet(playerTwo, FLEET_DEFINITIONS);
 createBoard(playerOne, playerOneContainer);
 createBoard(playerTwo, playerTwoContainer, true);
 updatePlayerOneBoard(playerOne);

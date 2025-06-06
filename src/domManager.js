@@ -110,9 +110,9 @@ function updatePlayerOneBoard(player) {
   return updateBoard(player, tableBoard);
 }
 
-function updatePlayerTwoBoard(player) {
+function updatePlayerTwoBoard(player, isComputerBoard) {
   const tableBoard = document.querySelector("#player-two-container>table");
-  return updateBoard(player, tableBoard);
+  return updateBoard(player, tableBoard, isComputerBoard);
 }
 
 function addFleetButtons() {
@@ -133,6 +133,18 @@ function addFleetButtons() {
     });
     buttonsContainer.appendChild(button);
   }
+  const rotateButton = document.createElement("button");
+  rotateButton.addEventListener("click", () => {
+    if (!selectedShip) {
+      return;
+    }
+    let currentOrientation = selectedShip["orientation"];
+    selectedShip["orientation"] =
+      currentOrientation == "horizontal" ? "vertical" : "horizontal";
+    console.log(`Ship orientation: ${selectedShip["orientation"]}`);
+  });
+  rotateButton.textContent = "🔄️ Rotate 🔄️";
+  buttonsContainer.appendChild(rotateButton);
   playerOneContainer.appendChild(buttonsContainer);
 }
 

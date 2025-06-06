@@ -1,8 +1,9 @@
 import Ship from "./Ship";
-import { FLEET_DEFINITIONS } from "./gameConfig";
+import { FLEET_DEFINITIONS, BOARD_HEIGHT, BOARD_WIDTH } from "./gameConfig";
 // For now, focus only on player vs computer
 
 let selectedShip = null;
+let lastPreviewedCells = [];
 
 function setPlayersContainers() {
   const boardsContainer = document.querySelector("#boards-container");
@@ -49,6 +50,7 @@ function createBoard(player, parentContainer, isComputerBoard = false) {
             }
           }
         });
+        tableCell.addEventListener("mouseover", handleCellMouseover);
       } else {
         // Add event listener to computer's board to receive attacks from user
         tableCell.addEventListener("click", () => {
@@ -146,6 +148,74 @@ function addFleetButtons() {
   rotateButton.textContent = "🔄️ Rotate 🔄️";
   buttonsContainer.appendChild(rotateButton);
   playerOneContainer.appendChild(buttonsContainer);
+}
+
+function calculateCells(startX, startY, length, orientation) {
+  const cells = [];
+  for (let i = 0; i < length; i++) {
+    if (orientation == "horizontal") {
+      cells.push({ x: startX + i, y: startY });
+    } else {
+      cells.push({ x: startX, y: startY + i });
+    }
+  }
+  return cells;
+}
+
+function handleCellMouseover(event) {
+  if (!selectedShip) {
+    return;
+  }
+
+  const gridContainer = document.querySelector("#player-one-container");
+
+  clearPreview();
+  const currentCell = event.target;
+  const startX = parseInt(currentCell.dataset.x);
+  const startY = parseInt(currentCell.dataset.y);
+
+  const cellsCoords = calculateCells(
+    startX,
+    startY,
+    selectedShip["length"],
+    selectedShip["orientation"],
+  );
+
+  const placementIsValid = isValidPlacement(cellsCoords);
+  const previewClass = placementIsValid ? "preview" : "preview-invalid";
+
+  cellsCoords.forEach((coord) => {
+    const cell = gridContainer.querySelector(
+      `[data-x="${coord.x}"][data-y="${coord.y}"]`,
+    );
+    if (cell) {
+      cell.classList.add(previewClass);
+      lastPreviewedCells.push(cell);
+    }
+  });
+}
+
+function clearPreview() {
+  lastPreviewedCells.forEach((cell) => {
+    cell.classList.remove("preview", "preview-invalid");
+  });
+  lastPreviewedCells = [];
+}
+
+function isValidPlacement(cells) {
+  const gridContainer = document.querySelector("#player-one-container");
+  for (const { x, y } of cells) {
+    if (x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT) {
+      return false;
+    }
+    const cellElement = gridContainer.querySelector(
+      `[data-x="${x}"][data-y="${y}"]`,
+    );
+    if (cellElement && cellElement.classList.contains("ship")) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export {

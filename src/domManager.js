@@ -15,7 +15,13 @@ function setPlayersContainers() {
   boardsContainer.append(playerTwoContainer);
 }
 
-function createBoard(player, parentContainer, isComputerBoard = false) {
+function createBoard(
+  player,
+  parentContainer,
+  isComputerBoard = false,
+  attackCallback,
+  label,
+) {
   const [width, height] = player.gameboard.size;
   const boardTable = document.createElement("table");
   for (let row = 0; row < height; row++) {
@@ -46,7 +52,6 @@ function createBoard(player, parentContainer, isComputerBoard = false) {
               selectedShipBtn.remove();
               selectedShip = null;
               updateBoard(player, boardTable);
-              player.gameboard.printBoard();
             }
           }
         });
@@ -58,17 +63,17 @@ function createBoard(player, parentContainer, isComputerBoard = false) {
             return;
           }
           let coordinates = [row, column];
-          let result = player.gameboard.receiveAttack(coordinates);
-          if (result === "hit" || result === "sunk" || result === "miss") {
-            updateBoard(player, boardTable, isComputerBoard);
-          }
-          player.gameboard.printBoard();
+          attackCallback(coordinates, player, boardTable, isComputerBoard);
         });
       }
       tableRow.appendChild(tableCell);
+      boardTable.appendChild(tableRow);
     }
-    boardTable.appendChild(tableRow);
   }
+  const boardLabel = document.createElement("p");
+  boardLabel.classList.add("player-label");
+  boardLabel.textContent = label;
+  parentContainer.appendChild(boardLabel);
   parentContainer.appendChild(boardTable);
 }
 
@@ -202,6 +207,14 @@ function clearPreview() {
   lastPreviewedCells = [];
 }
 
+function setBoardClickable(boardElement, clickable) {
+  if (clickable) {
+    boardElement.classList.remove("disabled-board");
+  } else {
+    boardElement.classList.add("disabled-board");
+  }
+}
+
 function isValidPlacement(cells) {
   const gridContainer = document.querySelector("#player-one-container");
   for (const { x, y } of cells) {
@@ -218,10 +231,28 @@ function isValidPlacement(cells) {
   return true;
 }
 
+function displayPhase(currentPhase) {
+  const phaseElement = document.querySelector(".phaseText");
+  phaseElement.textContent = `Current phase: ${currentPhase}`;
+}
+
+function setupInterface() {
+  const bodyElement = document.querySelector("body");
+  const labelsContainer = document.createElement("div");
+  labelsContainer.classList.add("labels");
+  const phaseElement = document.createElement("p");
+  phaseElement.classList.add("phaseText");
+  labelsContainer.appendChild(phaseElement);
+  bodyElement.appendChild(labelsContainer);
+}
+
 export {
   createBoard,
   updatePlayerOneBoard,
   updatePlayerTwoBoard,
   setPlayersContainers,
   addFleetButtons,
+  updateBoard,
+  setupInterface,
+  displayPhase,
 };

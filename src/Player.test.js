@@ -53,4 +53,13 @@ describe("Player tests", () => {
     const player = new Player("real");
     expect(player.gameboard).toBeInstanceOf(Gameboard);
   });
+
+  describe("makeRandomAttack() method", () => {
+    test("should return attack result", () => {
+      const player = new Player("computer", 10, 10);
+      const opponent = new Player("computer", 10, 10);
+      const result = player.makeRandomAttack(opponent.gameboard);
+      expect(result).toBe("miss");
+    });
+  });
 });

@@ -48,3 +48,9 @@ td:hover,
 .sunk {
   background-color: black;
 }
+
+.player-label {
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  text-align: center;
+}

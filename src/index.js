@@ -17,6 +17,7 @@ import {
   handleCellMouseover,
   addAttackListeners,
   removePlacementListeners,
+  addRandomizerButton,
 } from "./domManager";
 
 // let width = prompt("Enter board size:");
@@ -74,6 +75,15 @@ function switchTurns() {
     handleComputerAttack();
   }
   console.log(`currentPlayer=${currentPlayer.type}`);
+}
+
+function handleRandomizeClick() {
+  playerOne.gameboard.clear();
+  playerOne.gameboard.placeShipsRandomly();
+  updatePlayerOneBoard(playerOne);
+  const buttonsContainer = document.querySelector(".buttons-container");
+  buttonsContainer.remove();
+  transitionToBattlePhase(playerOneContainer.querySelector("table"));
 }
 
 function handlePlayerAttack(
@@ -148,12 +158,13 @@ function transitionToBattlePhase(playerBoardElement) {
 setPlayersContainers();
 const playerOneContainer = document.querySelector("#player-one-container");
 const playerTwoContainer = document.querySelector("#player-two-container");
-setupFleet(playerTwo, FLEET_DEFINITIONS);
+playerTwo.gameboard.placeShipsRandomly();
 createBoard(playerOne, playerOneContainer, "Player");
 createBoard(playerTwo, playerTwoContainer, "Opponent");
 updatePlayerOneBoard(playerOne);
 updatePlayerTwoBoard(playerTwo, true);
 addFleetButtons();
+addRandomizerButton(handleRandomizeClick);
 setupInterface();
 displayPhase(gamePhase);
 addPlacementListeners(

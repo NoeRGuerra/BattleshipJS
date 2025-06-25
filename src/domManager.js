@@ -224,6 +224,14 @@ function addFleetButtons() {
   playerOneContainer.appendChild(buttonsContainer);
 }
 
+function addRandomizerButton(randomizeCallback) {
+  const buttonsContainer = document.querySelector(".buttons-container");
+  const randomizeButton = document.createElement("button");
+  randomizeButton.textContent = "Random";
+  randomizeButton.addEventListener("click", randomizeCallback);
+  buttonsContainer.appendChild(randomizeButton);
+}
+
 function calculateCells(startX, startY, length, orientation) {
   const cells = [];
   for (let i = 0; i < length; i++) {
@@ -341,4 +349,5 @@ export {
   handleCellMouseover,
   addAttackListeners,
   removePlacementListeners,
+  addRandomizerButton,
 };

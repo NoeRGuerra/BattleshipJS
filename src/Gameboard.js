@@ -1,3 +1,4 @@
+const { FLEET_DEFINITIONS } = require("./gameConfig");
 const Ship = require("./Ship");
 
 class Gameboard {
@@ -160,6 +161,31 @@ class Gameboard {
       return false;
     }
     return this.ships.every((ship) => ship.isSunk() === true);
+  }
+
+  clear() {
+    this.board = this.createBoard(this.size);
+    this.ships = [];
+  }
+
+  placeShipsRandomly() {
+    FLEET_DEFINITIONS.forEach((shipDefinition) => {
+      let placed = false;
+      while (!placed) {
+        const orientation = Math.random() < 0.5 ? "horizontal" : "vertical";
+        const row = Math.floor(Math.random() * this.size[1]);
+        const column = Math.floor(Math.random() * this.size[0]);
+
+        const result = this.placeShip(
+          [row, column],
+          orientation,
+          shipDefinition.length,
+        );
+        if (result === "placed") {
+          placed = true;
+        }
+      }
+    });
   }
 }
 

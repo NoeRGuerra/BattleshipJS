@@ -191,7 +191,7 @@ function updatePlayerTwoBoard(player, isComputerBoard) {
   return updateBoard(player, tableBoard, isComputerBoard);
 }
 
-function addFleetButtons() {
+function addFleetButtons(randomizeCallback) {
   const playerOneContainer = document.querySelector("#player-one-container");
   const buttonsContainer = document.createElement("div");
   buttonsContainer.setAttribute("class", "buttons-container");
@@ -220,16 +220,12 @@ function addFleetButtons() {
     console.log(`Ship orientation: ${selectedShip["orientation"]}`);
   });
   rotateButton.textContent = "🔄️ Rotate 🔄️";
-  buttonsContainer.appendChild(rotateButton);
-  playerOneContainer.appendChild(buttonsContainer);
-}
-
-function addRandomizerButton(randomizeCallback) {
-  const buttonsContainer = document.querySelector(".buttons-container");
   const randomizeButton = document.createElement("button");
   randomizeButton.textContent = "Random";
   randomizeButton.addEventListener("click", randomizeCallback);
   buttonsContainer.appendChild(randomizeButton);
+  buttonsContainer.appendChild(rotateButton);
+  playerOneContainer.appendChild(buttonsContainer);
 }
 
 function calculateCells(startX, startY, length, orientation) {
@@ -334,6 +330,37 @@ function setupInterface() {
   bodyElement.appendChild(labelsContainer);
 }
 
+function showGameOverScreen(winnerText, restartCallback) {
+  const body = document.querySelector("body");
+  const overlay = document.createElement("div");
+  overlay.classList.add("game-over-overlay");
+  const messageBox = document.createElement("div");
+  messageBox.classList.add("messageBox");
+  const winnerLabel = document.createElement("p");
+  winnerLabel.textContent = winnerText;
+  const restartButton = document.createElement("button");
+  restartButton.textContent = "Restart game";
+  restartButton.addEventListener("click", restartCallback);
+  messageBox.appendChild(winnerLabel);
+  messageBox.appendChild(restartButton);
+  overlay.appendChild(messageBox);
+  body.appendChild(overlay);
+}
+
+function removeGameOverScreen() {
+  const overlay = document.querySelector(".game-over-overlay");
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
+function clearButtons() {
+  const buttonsContainer = document.querySelector(".buttons-container");
+  if (buttonsContainer) {
+    buttonsContainer.remove();
+  }
+}
+
 export {
   createBoard,
   updatePlayerOneBoard,
@@ -349,5 +376,7 @@ export {
   handleCellMouseover,
   addAttackListeners,
   removePlacementListeners,
-  addRandomizerButton,
+  showGameOverScreen,
+  removeGameOverScreen,
+  clearButtons,
 };

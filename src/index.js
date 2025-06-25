@@ -17,7 +17,9 @@ import {
   handleCellMouseover,
   addAttackListeners,
   removePlacementListeners,
-  addRandomizerButton,
+  showGameOverScreen,
+  removeGameOverScreen,
+  clearButtons,
 } from "./domManager";
 
 // let width = prompt("Enter board size:");
@@ -61,18 +63,15 @@ function setupFleet(player, fleetDefinitions) {
 }
 
 function switchTurns() {
-  if (
-    currentPlayer.gameboard.areAllShipsSunk() ||
-    opponentPlayer.gameboard.areAllShipsSunk()
-  ) {
-    gameActive = false;
-    gamePhase = "game_over";
+  if (opponentPlayer.gameboard.areAllShipsSunk()) {
     console.log("All ships are sunk!");
-    endGame();
+    endGame(currentPlayer);
+    return;
   }
   [currentPlayer, opponentPlayer] = [opponentPlayer, currentPlayer];
   if (currentPlayer.type == "computer") {
     handleComputerAttack();
+    // setTimeout(handleComputerAttack, 500);
   }
   console.log(`currentPlayer=${currentPlayer.type}`);
 }
@@ -125,13 +124,22 @@ function handleComputerAttack() {
     return;
   }
   console.log(`Computer attack: ${result}`);
+  const attackedCoords =
+    currentPlayer.gameboard.attackedCoordinates[
+      currentPlayer.gameboard.attackedCoordinates.length - 1
+    ];
+  displayStatus(`Computer attacked [${attackedCoords}]: ${result}!`);
   updateBoard(opponentPlayer, playerOneContainer.querySelector("table"), false);
   switchTurns();
 }
 
-function endGame() {
+function endGame(winner) {
   console.log("Game over!");
+  gameActive = false;
+  gamePhase = "game_over";
+  const winnerName = winner.type === "real" ? "Player" : "Computer";
   displayPhase("Game over!");
+  showGameOverScreen(`${winnerName} wins!`, resetGame);
 }
 
 function handleShipPlacedCallback() {
@@ -144,6 +152,7 @@ function handleShipPlacedCallback() {
 
 function transitionToBattlePhase(playerBoardElement) {
   gamePhase = "battle";
+  displayPhase(gamePhase);
   gameActive = true;
   removePlacementListeners(playerBoardElement);
   console.log("Battle!");
@@ -155,6 +164,30 @@ function transitionToBattlePhase(playerBoardElement) {
   );
 }
 
+function resetGame() {
+  gameActive = false;
+  gamePhase = "placement";
+  playerOne.gameboard.clear();
+  playerTwo.gameboard.clear();
+  currentPlayer = playerOne;
+  opponentPlayer = playerTwo;
+  playerTwo.gameboard.placeShipsRandomly();
+  removeGameOverScreen();
+  updatePlayerOneBoard(playerOne);
+  updatePlayerTwoBoard(playerTwo, true);
+  displayPhase(gamePhase);
+  displayStatus("Place your ships or click 'random'");
+  clearButtons();
+  addFleetButtons(handleRandomizeClick);
+  addPlacementListeners(
+    playerOneContainer.querySelector("table"),
+    playerOne,
+    handlePlayerPlacementClick,
+    handleCellMouseover,
+    handleShipPlacedCallback,
+  );
+}
+
 setPlayersContainers();
 const playerOneContainer = document.querySelector("#player-one-container");
 const playerTwoContainer = document.querySelector("#player-two-container");
@@ -163,8 +196,7 @@ createBoard(playerOne, playerOneContainer, "Player");
 createBoard(playerTwo, playerTwoContainer, "Opponent");
 updatePlayerOneBoard(playerOne);
 updatePlayerTwoBoard(playerTwo, true);
-addFleetButtons();
-addRandomizerButton(handleRandomizeClick);
+addFleetButtons(handleRandomizeClick);
 setupInterface();
 displayPhase(gamePhase);
 addPlacementListeners(

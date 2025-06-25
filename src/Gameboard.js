@@ -166,6 +166,8 @@ class Gameboard {
   clear() {
     this.board = this.createBoard(this.size);
     this.ships = [];
+    this.missedAttacks = [];
+    this.attackedCoordinates = [];
   }
 
   placeShipsRandomly() {

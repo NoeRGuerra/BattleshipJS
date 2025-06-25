@@ -4,6 +4,10 @@ import { FLEET_DEFINITIONS, BOARD_HEIGHT, BOARD_WIDTH } from "./gameConfig";
 
 let selectedShip = null;
 let lastPreviewedCells = [];
+let boundHandlePlacementClick = null;
+let boundHandlePlacementMouseover = null;
+let boundHandleAttackClick = null;
+let boundClearPreview = null;
 
 function setPlayersContainers() {
   const boardsContainer = document.querySelector("#boards-container");
@@ -15,13 +19,7 @@ function setPlayersContainers() {
   boardsContainer.append(playerTwoContainer);
 }
 
-function createBoard(
-  player,
-  parentContainer,
-  isComputerBoard = false,
-  attackCallback,
-  label,
-) {
+function createBoard(player, parentContainer, label) {
   const [width, height] = player.gameboard.size;
   const boardTable = document.createElement("table");
   for (let row = 0; row < height; row++) {
@@ -30,51 +28,122 @@ function createBoard(
       const tableCell = document.createElement("td");
       tableCell.setAttribute("data-x", `${column}`);
       tableCell.setAttribute("data-y", `${row}`);
-      if (!isComputerBoard) {
-        tableCell.addEventListener("click", () => {
-          if (selectedShip) {
-            console.log(
-              `Placing ${selectedShip["name"]}: ${selectedShip["length"]} on [${row}, ${column}], ${selectedShip["orientation"]}`,
-            );
-            let result = player.gameboard.placeShip(
-              [row, column],
-              selectedShip["orientation"],
-              selectedShip["length"],
-            );
-            console.log(`result = ${result}`);
-            if (result === "placed") {
-              const buttons = parentContainer.querySelectorAll(
-                ".buttons-container button",
-              );
-              const selectedShipBtn = Array.from(buttons).find((button) =>
-                button.textContent.includes(selectedShip["name"]),
-              );
-              selectedShipBtn.remove();
-              selectedShip = null;
-              updateBoard(player, boardTable);
-            }
-          }
-        });
-        tableCell.addEventListener("mouseover", handleCellMouseover);
-      } else {
-        // Add event listener to computer's board to receive attacks from user
-        tableCell.addEventListener("click", () => {
-          if (selectedShip) {
-            return;
-          }
-          let coordinates = [row, column];
-          attackCallback(coordinates, player, boardTable, isComputerBoard);
-        });
-      }
       tableRow.appendChild(tableCell);
-      boardTable.appendChild(tableRow);
     }
+    boardTable.appendChild(tableRow);
   }
   const boardLabel = document.createElement("p");
   boardLabel.classList.add("player-label");
   boardLabel.textContent = label;
   parentContainer.appendChild(boardLabel);
   parentContainer.appendChild(boardTable);
+  return boardTable;
+}
+
+function addPlacementListeners(
+  playerBoardElement,
+  playerObject,
+  handlePlacementClickCallback,
+  handlePlacementMouseoverCallback,
+  onShipPlacementCallback,
+) {
+  boundHandlePlacementClick = (event) => {
+    if (event.target.tagName === "TD") {
+      const row = parseInt(event.target.dataset.y);
+      const column = parseInt(event.target.dataset.x);
+      handlePlacementClickCallback(
+        playerObject,
+        [row, column],
+        playerBoardElement,
+        onShipPlacementCallback,
+      );
+    }
+  };
+  playerBoardElement.addEventListener("click", boundHandlePlacementClick);
+
+  boundHandlePlacementMouseover = (event) => {
+    if (event.target.tagName === "TD") {
+      handlePlacementMouseoverCallback(event, playerObject.gameboard);
+    }
+  };
+  playerBoardElement.addEventListener(
+    "mouseover",
+    boundHandlePlacementMouseover,
+  );
+
+  playerBoardElement.addEventListener("mouseleave", clearPreview);
+}
+
+function addAttackListeners(
+  opponentBoardElement,
+  handleAttackClick,
+  opponentPlayer,
+  isComputerBoard = true,
+) {
+  boundHandleAttackClick = (event) => {
+    if (event.target.tagName !== "TD") {
+      return;
+    }
+    if (selectedShip) {
+      return;
+    }
+    let coordinates = [
+      parseInt(event.target.dataset.y, 10),
+      parseInt(event.target.dataset.x, 10),
+    ];
+    handleAttackClick(
+      coordinates,
+      opponentPlayer,
+      opponentBoardElement,
+      isComputerBoard,
+    );
+  };
+  opponentBoardElement.addEventListener("click", boundHandleAttackClick);
+}
+
+function removePlacementListeners(playerBoardElement) {
+  playerBoardElement.removeEventListener("click", boundHandlePlacementClick);
+  playerBoardElement.removeEventListener(
+    "mouseover",
+    boundHandlePlacementMouseover,
+  );
+  playerBoardElement.removeEventListener("mouseleave", clearPreview);
+}
+
+// function removeAttackListeners(opponentBoardElement) {
+//   opponentBoardElement.removeEventListener("click");
+// }
+
+function handlePlayerPlacementClick(
+  playerObject,
+  coordinates,
+  boardTable,
+  onShipPlacementCallback,
+) {
+  if (!selectedShip) {
+    return;
+  }
+
+  const [row, column] = coordinates;
+  console.log(
+    `Placing ${selectedShip["name"]}: ${selectedShip["length"]} on [${row}, ${column}], ${selectedShip["orientation"]}`,
+  );
+  let result = playerObject.gameboard.placeShip(
+    [row, column],
+    selectedShip["orientation"],
+    selectedShip["length"],
+  );
+  console.log(`result = ${result}`);
+  if (result === "placed") {
+    const buttons = document.querySelectorAll(".buttons-container button");
+    const selectedShipBtn = Array.from(buttons).find((button) =>
+      button.textContent.includes(selectedShip["name"]),
+    );
+    selectedShipBtn.remove();
+    selectedShip = null;
+    updateBoard(playerObject, boardTable);
+    onShipPlacementCallback();
+  }
 }
 
 function updateBoard(player, tableElement, isComputerBoard = false) {
@@ -236,6 +305,11 @@ function displayPhase(currentPhase) {
   phaseElement.textContent = `Current phase: ${currentPhase}`;
 }
 
+function displayStatus(message) {
+  const statusLabel = document.querySelector(".status-label");
+  statusLabel.textContent = message;
+}
+
 function setupInterface() {
   const bodyElement = document.querySelector("body");
   const labelsContainer = document.createElement("div");
@@ -243,6 +317,12 @@ function setupInterface() {
   const phaseElement = document.createElement("p");
   phaseElement.classList.add("phaseText");
   labelsContainer.appendChild(phaseElement);
+
+  const statusLabel = document.createElement("p");
+  statusLabel.className = "status-label";
+  statusLabel.textContent = "It's your turn";
+  labelsContainer.appendChild(statusLabel);
+
   bodyElement.appendChild(labelsContainer);
 }
 
@@ -255,4 +335,10 @@ export {
   updateBoard,
   setupInterface,
   displayPhase,
+  displayStatus,
+  addPlacementListeners,
+  handlePlayerPlacementClick,
+  handleCellMouseover,
+  addAttackListeners,
+  removePlacementListeners,
 };

@@ -54,3 +54,10 @@ td:hover,
   font-family: "Courier New", Courier, monospace;
   text-align: center;
 }
+
+.labels {
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.1em;
+  text-align: center;
+}

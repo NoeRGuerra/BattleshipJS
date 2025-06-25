@@ -11,6 +11,12 @@ import {
   updateBoard,
   setupInterface,
   displayPhase,
+  displayStatus,
+  addPlacementListeners,
+  handlePlayerPlacementClick,
+  handleCellMouseover,
+  addAttackListeners,
+  removePlacementListeners,
 } from "./domManager";
 
 // let width = prompt("Enter board size:");
@@ -33,6 +39,7 @@ let currentPlayer = playerOne;
 let opponentPlayer = playerTwo;
 let gameActive = false;
 let gamePhase = "placement";
+let humanPlayerShipsToPlace = FLEET_DEFINITIONS.length;
 
 function setupFleet(player, fleetDefinitions) {
   for (let i = 0; i < fleetDefinitions.length; i += 1) {
@@ -54,10 +61,11 @@ function setupFleet(player, fleetDefinitions) {
 
 function switchTurns() {
   if (
-    currentPlayer.gameboard.areAllShipsSunk ||
-    opponentPlayer.gameboard.areAllShipsSunk
+    currentPlayer.gameboard.areAllShipsSunk() ||
+    opponentPlayer.gameboard.areAllShipsSunk()
   ) {
     gameActive = false;
+    gamePhase = "game_over";
     console.log("All ships are sunk!");
     endGame();
   }
@@ -70,19 +78,33 @@ function switchTurns() {
 
 function handlePlayerAttack(
   coordinates,
-  player,
+  targetPlayer,
   boardElement,
   isComputerBoard = true,
 ) {
-  // if (player === currentPlayer) {
-  //   // Reject attack if it's not the user's turn
-  //   console.log("Not your turn!");
-  //   return;
-  // }
-  const result = player.gameboard.receiveAttack(coordinates);
+  if (
+    targetPlayer !== opponentPlayer ||
+    !gameActive ||
+    currentPlayer.type != "real"
+  ) {
+    // Reject attack if it's not the user's turn
+    console.log("Not your turn!");
+    return;
+  }
+
+  if (targetPlayer !== opponentPlayer) {
+    console.error("Attempted to attack non-opponent board");
+    return;
+  }
+  const result = targetPlayer.gameboard.receiveAttack(coordinates);
   if (result === "hit" || result === "sunk" || result === "miss") {
-    updateBoard(player, boardElement, isComputerBoard);
+    updateBoard(targetPlayer, boardElement, isComputerBoard);
+    displayStatus(
+      `Attack result on [${coordinates[0]}, ${coordinates[1]}]: ${result}`,
+    );
     switchTurns();
+  } else {
+    displayStatus("Invalid move. Try again.");
   }
 }
 
@@ -99,22 +121,45 @@ function handleComputerAttack() {
 
 function endGame() {
   console.log("Game over!");
+  displayPhase("Game over!");
+}
+
+function handleShipPlacedCallback() {
+  humanPlayerShipsToPlace -= 1;
+  console.log(`humanPlayerShipsToPlace = ${humanPlayerShipsToPlace}`);
+  if (humanPlayerShipsToPlace == 0) {
+    transitionToBattlePhase(playerOneContainer.querySelector("table"));
+  }
+}
+
+function transitionToBattlePhase(playerBoardElement) {
+  gamePhase = "battle";
+  gameActive = true;
+  removePlacementListeners(playerBoardElement);
+  console.log("Battle!");
+  addAttackListeners(
+    playerTwoContainer.querySelector("table"),
+    handlePlayerAttack,
+    opponentPlayer,
+    true,
+  );
 }
 
 setPlayersContainers();
 const playerOneContainer = document.querySelector("#player-one-container");
 const playerTwoContainer = document.querySelector("#player-two-container");
 setupFleet(playerTwo, FLEET_DEFINITIONS);
-createBoard(playerOne, playerOneContainer, false, () => {}, "Player");
-createBoard(
-  playerTwo,
-  playerTwoContainer,
-  true,
-  handlePlayerAttack,
-  "Opponent",
-);
+createBoard(playerOne, playerOneContainer, "Player");
+createBoard(playerTwo, playerTwoContainer, "Opponent");
 updatePlayerOneBoard(playerOne);
 updatePlayerTwoBoard(playerTwo, true);
 addFleetButtons();
 setupInterface();
 displayPhase(gamePhase);
+addPlacementListeners(
+  playerOneContainer.querySelector("table"),
+  playerOne,
+  handlePlayerPlacementClick,
+  handleCellMouseover,
+  handleShipPlacedCallback,
+);

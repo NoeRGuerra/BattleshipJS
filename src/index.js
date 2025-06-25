@@ -22,20 +22,6 @@ import {
   clearButtons,
 } from "./domManager";
 
-// let width = prompt("Enter board size:");
-// // let width = 10;
-// while (!isInputValid(width)) {
-//   alert("Invalid input, try again.");
-//   width = prompt("Enter board size:");
-// }
-
-// function isInputValid(input) {
-//   if (isNaN(input) || parseInt(input) < 5) {
-//     return false;
-//   }
-//   return true;
-// }
-
 const playerOne = new Player("real", BOARD_WIDTH, BOARD_HEIGHT);
 const playerTwo = new Player("computer", BOARD_WIDTH, BOARD_HEIGHT);
 let currentPlayer = playerOne;
@@ -43,24 +29,6 @@ let opponentPlayer = playerTwo;
 let gameActive = false;
 let gamePhase = "placement";
 let humanPlayerShipsToPlace = FLEET_DEFINITIONS.length;
-
-function setupFleet(player, fleetDefinitions) {
-  for (let i = 0; i < fleetDefinitions.length; i += 1) {
-    const result = player.gameboard.placeShip(
-      [i, 4],
-      "horizontal",
-      fleetDefinitions[i]["length"],
-    );
-    if (result !== "placed") {
-      console.log(`Error: ${result}`);
-    } else {
-      console.log(
-        `${fleetDefinitions[i]["name"]} placed for ${player.type} player`,
-      );
-      player.gameboard.printBoard();
-    }
-  }
-}
 
 function switchTurns() {
   if (opponentPlayer.gameboard.areAllShipsSunk()) {

@@ -394,4 +394,5 @@ export {
   showGameOverScreen,
   removeGameOverScreen,
   clearButtons,
+  setBoardClickable,
 };

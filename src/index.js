@@ -20,6 +20,7 @@ import {
   showGameOverScreen,
   removeGameOverScreen,
   clearButtons,
+  setBoardClickable,
 } from "./domManager";
 
 const playerOne = new Player("real", BOARD_WIDTH, BOARD_HEIGHT);
@@ -123,6 +124,8 @@ function transitionToBattlePhase(playerBoardElement) {
   displayPhase(gamePhase);
   gameActive = true;
   removePlacementListeners(playerBoardElement);
+  const opponentBoardElement = playerTwoContainer.querySelector("table");
+  setBoardClickable(opponentBoard, true);
   console.log("Battle!");
   addAttackListeners(
     playerTwoContainer.querySelector("table"),
@@ -162,6 +165,8 @@ const playerTwoContainer = document.querySelector("#player-two-container");
 playerTwo.gameboard.placeShipsRandomly();
 createBoard(playerOne, playerOneContainer, "Player");
 createBoard(playerTwo, playerTwoContainer, "Opponent");
+const opponentBoard = playerTwoContainer.querySelector("table");
+setBoardClickable(opponentBoard, false);
 updatePlayerOneBoard(playerOne);
 updatePlayerTwoBoard(playerTwo, true);
 addFleetButtons(handleRandomizeClick);

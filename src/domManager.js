@@ -120,11 +120,24 @@ function handlePlayerPlacementClick(
   boardTable,
   onShipPlacementCallback,
 ) {
+  const [row, column] = coordinates;
+  const clickedCell = playerObject.gameboard.board[row][column];
+  if (clickedCell instanceof Ship && !selectedShip) {
+    playerObject.gameboard.removeShip(clickedCell);
+    selectedShip = {
+      name: "Ship",
+      length: clickedCell.length,
+      orientation: "horizontal",
+    };
+    console.log(`Picked up ship of length ${selectedShip.length}`);
+    updateBoard(playerObject, boardTable);
+    return;
+  }
+
   if (!selectedShip) {
     return;
   }
 
-  const [row, column] = coordinates;
   console.log(
     `Placing ${selectedShip["name"]}: ${selectedShip["length"]} on [${row}, ${column}], ${selectedShip["orientation"]}`,
   );
@@ -139,10 +152,12 @@ function handlePlayerPlacementClick(
     const selectedShipBtn = Array.from(buttons).find((button) =>
       button.textContent.includes(selectedShip["name"]),
     );
-    selectedShipBtn.remove();
+    if (selectedShipBtn) {
+      selectedShipBtn.remove();
+      onShipPlacementCallback();
+    }
     selectedShip = null;
     updateBoard(playerObject, boardTable);
-    onShipPlacementCallback();
   }
 }
 

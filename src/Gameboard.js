@@ -189,6 +189,22 @@ class Gameboard {
       }
     });
   }
+
+  removeShip(shipToRemove) {
+    let found = false;
+    for (let row = 0; row < this.size[1]; row += 1) {
+      for (let column = 0; column < this.size[0]; column += 1) {
+        if (this.board[row][column] === shipToRemove) {
+          this.board[row][column] = "-";
+          found = true;
+        }
+      }
+    }
+    if (found) {
+      this.ships = this.ships.filter((ship) => ship !== shipToRemove);
+    }
+    return found;
+  }
 }
 
 module.exports = Gameboard;

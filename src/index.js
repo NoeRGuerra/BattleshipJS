@@ -21,6 +21,8 @@ import {
   removeGameOverScreen,
   clearButtons,
   setBoardClickable,
+  createStartButtonOverlay,
+  removeStartButtonOverlay,
 } from "./domManager";
 
 const playerOne = new Player("real", BOARD_WIDTH, BOARD_HEIGHT);
@@ -30,6 +32,20 @@ let opponentPlayer = playerTwo;
 let gameActive = false;
 let gamePhase = "placement";
 let humanPlayerShipsToPlace = FLEET_DEFINITIONS.length;
+
+function startGame() {
+  removeStartButtonOverlay();
+  clearButtons();
+  transitionToBattlePhase();
+}
+
+function showStartButton() {
+  const fleetButtons = document.querySelectorAll(
+    ".fleet-button, .rotate-button",
+  );
+  fleetButtons.forEach((btn) => (btn.disabled = true));
+  createStartButtonOverlay(startGame);
+}
 
 function switchTurns() {
   if (opponentPlayer.gameboard.areAllShipsSunk()) {
@@ -49,9 +65,9 @@ function handleRandomizeClick() {
   playerOne.gameboard.clear();
   playerOne.gameboard.placeShipsRandomly();
   updatePlayerOneBoard(playerOne);
-  const buttonsContainer = document.querySelector(".buttons-container");
-  buttonsContainer.remove();
-  transitionToBattlePhase(playerOneContainer.querySelector("table"));
+  updatePlayerOneBoard(playerOne);
+  humanPlayerShipsToPlace = 0;
+  showStartButton();
 }
 
 function handlePlayerAttack(
@@ -115,14 +131,15 @@ function handleShipPlacedCallback() {
   humanPlayerShipsToPlace -= 1;
   console.log(`humanPlayerShipsToPlace = ${humanPlayerShipsToPlace}`);
   if (humanPlayerShipsToPlace == 0) {
-    transitionToBattlePhase(playerOneContainer.querySelector("table"));
+    showStartButton();
   }
 }
 
-function transitionToBattlePhase(playerBoardElement) {
+function transitionToBattlePhase() {
   gamePhase = "battle";
   displayPhase(gamePhase);
   gameActive = true;
+  const playerBoardElement = playerOneContainer.querySelector("table");
   removePlacementListeners(playerBoardElement);
   const opponentBoardElement = playerTwoContainer.querySelector("table");
   setBoardClickable(opponentBoard, true);

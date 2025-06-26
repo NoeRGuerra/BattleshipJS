@@ -213,6 +213,7 @@ function addFleetButtons(randomizeCallback) {
   //   const playerTwoContainer = document.querySelector("#player-two-container");
   for (let i = 0; i < FLEET_DEFINITIONS.length; i += 1) {
     const button = document.createElement("button");
+    button.classList.add("fleet-button");
     button.textContent = `${FLEET_DEFINITIONS[i]["name"]}: ${FLEET_DEFINITIONS[i]["length"]}`;
     button.addEventListener("click", () => {
       selectedShip = {
@@ -225,6 +226,7 @@ function addFleetButtons(randomizeCallback) {
     buttonsContainer.appendChild(button);
   }
   const rotateButton = document.createElement("button");
+  rotateButton.classList.add("rotate-button");
   rotateButton.addEventListener("click", () => {
     if (!selectedShip) {
       return;
@@ -236,6 +238,7 @@ function addFleetButtons(randomizeCallback) {
   });
   rotateButton.textContent = "🔄️ Rotate 🔄️";
   const randomizeButton = document.createElement("button");
+  randomizeButton.classList.add("randomize-button");
   randomizeButton.textContent = "Random";
   randomizeButton.addEventListener("click", randomizeCallback);
   buttonsContainer.appendChild(randomizeButton);
@@ -354,6 +357,7 @@ function showGameOverScreen(winnerText, restartCallback) {
   const winnerLabel = document.createElement("p");
   winnerLabel.textContent = winnerText;
   const restartButton = document.createElement("button");
+  restartButton.classList.add("start-button");
   restartButton.textContent = "Restart game";
   restartButton.addEventListener("click", restartCallback);
   messageBox.appendChild(winnerLabel);
@@ -376,6 +380,32 @@ function clearButtons() {
   }
 }
 
+function createStartButtonOverlay(startCallback) {
+  const opponentContainer = document.querySelector("#player-two-container");
+  if (opponentContainer.querySelector(".board-overlay")) {
+    return;
+  }
+
+  const overlay = document.createElement("div");
+  overlay.classList.add("board-overlay");
+
+  const startButton = document.createElement("button");
+  startButton.textContent = "Start";
+  startButton.classList.add("start-button");
+  startButton.addEventListener("click", startCallback);
+
+  overlay.appendChild(startButton);
+  opponentContainer.style.position = "relative";
+  opponentContainer.appendChild(overlay);
+}
+
+function removeStartButtonOverlay() {
+  const overlay = document.querySelector(".board-overlay");
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
 export {
   createBoard,
   updatePlayerOneBoard,
@@ -395,4 +425,6 @@ export {
   removeGameOverScreen,
   clearButtons,
   setBoardClickable,
+  createStartButtonOverlay,
+  removeStartButtonOverlay,
 };

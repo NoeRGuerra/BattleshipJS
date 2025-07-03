@@ -40,10 +40,9 @@ function startGame() {
 }
 
 function showStartButton() {
-  const fleetButtons = document.querySelectorAll(
-    ".fleet-button, .rotate-button",
-  );
-  fleetButtons.forEach((btn) => (btn.disabled = true));
+  const fleetButtons = document.querySelectorAll(".fleet-button");
+  // fleetButtons.forEach((btn) => (btn.disabled = true));
+  fleetButtons.forEach((btn) => btn.remove());
   createStartButtonOverlay(startGame);
 }
 

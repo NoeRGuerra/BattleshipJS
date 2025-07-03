@@ -1,5 +1,5 @@
 body {
-  background-color: rgb(43, 43, 43);
+  background-color: #fffbde;
 }
 
 h1 {
@@ -14,19 +14,15 @@ h1 {
   justify-content: space-around;
 }
 
-table {
-  border: 1px solid white;
-}
-
 td {
-  border: 1px solid white;
+  background-color: #91c8e4;
   height: 40px;
   width: 40px;
 }
 
 td:hover,
 .preview {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: #749bc2;
 }
 
 .preview-invalid {
@@ -34,7 +30,7 @@ td:hover,
 }
 
 .ship {
-  background-color: antiquewhite;
+  background-color: #4682a9;
 }
 
 .hit {
@@ -42,7 +38,7 @@ td:hover,
 }
 
 .miss {
-  background-color: tomato;
+  background-color: rgb(255, 175, 161);
 }
 
 .sunk {
@@ -50,7 +46,6 @@ td:hover,
 }
 
 .player-label {
-  color: white;
   font-family: "Courier New", Courier, monospace;
   text-align: center;
 }
@@ -130,4 +125,52 @@ td:hover,
 
 .start-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+.phaseText,
+.status-label,
+h1,
+.board-label,
+.player-label {
+  color: #4682a9;
+}
+
+.buttons-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.fleet-button {
+  background-color: #4682a9;
+  color: white;
+  border: 4px solid white;
+  padding: 10px;
+}
+
+.fleet-button:hover {
+  background-color: #2a4e66;
+}
+
+.randomize-button {
+  background-color: #46a98b;
+  color: white;
+  border: 4px solid white;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.randomize-button:hover {
+  background-color: #296351;
+}
+
+.rotate-button {
+  background-color: rgb(173, 159, 75);
+  color: white;
+  border: 4px solid white;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.rotate-button:hover {
+  background-color: rgb(102, 93, 44);
 }

@@ -1,6 +1,5 @@
 import Ship from "./Ship";
 import { FLEET_DEFINITIONS, BOARD_HEIGHT, BOARD_WIDTH } from "./gameConfig";
-// For now, focus only on player vs computer
 
 let selectedShip = null;
 let lastPreviewedCells = [];
@@ -8,6 +7,7 @@ let boundHandlePlacementClick = null;
 let boundHandlePlacementMouseover = null;
 let boundHandleAttackClick = null;
 let boundClearPreview = null;
+let lastHoveredCell = null;
 
 function setPlayersContainers() {
   const boardsContainer = document.querySelector("#boards-container");
@@ -22,8 +22,23 @@ function setPlayersContainers() {
 function createBoard(player, parentContainer, label) {
   const [width, height] = player.gameboard.size;
   const boardTable = document.createElement("table");
+
+  const headerRow = document.createElement("tr");
+  headerRow.appendChild(document.createElement("th"));
+  for (let column = 0; column < width; column++) {
+    const tableHeader = document.createElement("th");
+    tableHeader.textContent = column + 1;
+    tableHeader.classList.add("board-label");
+    headerRow.appendChild(tableHeader);
+  }
+  boardTable.appendChild(headerRow);
+
   for (let row = 0; row < height; row++) {
     const tableRow = document.createElement("tr");
+    const columnHeader = document.createElement("th");
+    columnHeader.textContent = String.fromCharCode(65 + row);
+    columnHeader.classList.add("board-label");
+    tableRow.appendChild(columnHeader);
     for (let column = 0; column < width; column++) {
       const tableCell = document.createElement("td");
       tableCell.setAttribute("data-x", `${column}`);
@@ -110,10 +125,6 @@ function removePlacementListeners(playerBoardElement) {
   playerBoardElement.removeEventListener("mouseleave", clearPreview);
 }
 
-// function removeAttackListeners(opponentBoardElement) {
-//   opponentBoardElement.removeEventListener("click");
-// }
-
 function handlePlayerPlacementClick(
   playerObject,
   coordinates,
@@ -123,11 +134,20 @@ function handlePlayerPlacementClick(
   const [row, column] = coordinates;
   const clickedCell = playerObject.gameboard.board[row][column];
   if (clickedCell instanceof Ship && !selectedShip) {
+    let shipOrientation = "horizontal";
+    if (
+      (row + 1 < playerObject.gameboard.size[1] &&
+        playerObject.gameboard.board[row + 1][column] === clickedCell) ||
+      (row - 1 >= 0 &&
+        playerObject.gameboard.board[row - 1][column] === clickedCell)
+    ) {
+      shipOrientation = "vertical";
+    }
     playerObject.gameboard.removeShip(clickedCell);
     selectedShip = {
       name: "Ship",
       length: clickedCell.length,
-      orientation: "horizontal",
+      orientation: shipOrientation,
     };
     console.log(`Picked up ship of length ${selectedShip.length}`);
     updateBoard(playerObject, boardTable);
@@ -210,7 +230,6 @@ function addFleetButtons(randomizeCallback) {
   const playerOneContainer = document.querySelector("#player-one-container");
   const buttonsContainer = document.createElement("div");
   buttonsContainer.setAttribute("class", "buttons-container");
-  //   const playerTwoContainer = document.querySelector("#player-two-container");
   for (let i = 0; i < FLEET_DEFINITIONS.length; i += 1) {
     const button = document.createElement("button");
     button.classList.add("fleet-button");
@@ -227,14 +246,12 @@ function addFleetButtons(randomizeCallback) {
   }
   const rotateButton = document.createElement("button");
   rotateButton.classList.add("rotate-button");
-  rotateButton.addEventListener("click", () => {
-    if (!selectedShip) {
-      return;
+  rotateButton.addEventListener("click", rotateSelectedShip);
+  document.addEventListener("keydown", (event) => {
+    if (event.code === "Space" && selectedShip) {
+      event.preventDefault();
+      rotateSelectedShip();
     }
-    let currentOrientation = selectedShip["orientation"];
-    selectedShip["orientation"] =
-      currentOrientation == "horizontal" ? "vertical" : "horizontal";
-    console.log(`Ship orientation: ${selectedShip["orientation"]}`);
   });
   rotateButton.textContent = "🔄️ Rotate 🔄️";
   const randomizeButton = document.createElement("button");
@@ -244,6 +261,25 @@ function addFleetButtons(randomizeCallback) {
   buttonsContainer.appendChild(randomizeButton);
   buttonsContainer.appendChild(rotateButton);
   playerOneContainer.appendChild(buttonsContainer);
+}
+
+function rotateSelectedShip() {
+  if (!selectedShip) {
+    return;
+  }
+  let currentOrientation = selectedShip["orientation"];
+  selectedShip["orientation"] =
+    currentOrientation == "horizontal" ? "vertical" : "horizontal";
+  console.log(`Ship orientation: ${selectedShip["orientation"]}`);
+
+  if (lastHoveredCell) {
+    lastHoveredCell.dispatchEvent(
+      new MouseEvent("mouseover", {
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+  }
 }
 
 function calculateCells(startX, startY, length, orientation) {
@@ -259,6 +295,7 @@ function calculateCells(startX, startY, length, orientation) {
 }
 
 function handleCellMouseover(event) {
+  lastHoveredCell = event.target;
   if (!selectedShip) {
     return;
   }

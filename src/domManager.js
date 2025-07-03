@@ -6,7 +6,6 @@ let lastPreviewedCells = [];
 let boundHandlePlacementClick = null;
 let boundHandlePlacementMouseover = null;
 let boundHandleAttackClick = null;
-let boundClearPreview = null;
 let lastHoveredCell = null;
 
 function setPlayersContainers() {
@@ -135,19 +134,44 @@ function handlePlayerPlacementClick(
   const clickedCell = playerObject.gameboard.board[row][column];
   if (clickedCell instanceof Ship && !selectedShip) {
     let shipOrientation = "horizontal";
-    if (
-      (row + 1 < playerObject.gameboard.size[1] &&
-        playerObject.gameboard.board[row + 1][column] === clickedCell) ||
-      (row - 1 >= 0 &&
-        playerObject.gameboard.board[row - 1][column] === clickedCell)
-    ) {
-      shipOrientation = "vertical";
+    let clickIndex = 0;
+
+    for (let r = 0; r < playerObject.gameboard.size[1]; r++) {
+      let originFound = false;
+      for (let c = 0; c < playerObject.gameboard.size[0]; c++) {
+        if (playerObject.gameboard.board[r][c] === clickedCell) {
+          if (
+            r + 1 < playerObject.gameboard.size[1] &&
+            playerObject.gameboard.board[r + 1][c] === clickedCell
+          ) {
+            shipOrientation = "vertical";
+            clickIndex = row - r;
+          } else {
+            shipOrientation = "horizontal";
+            clickIndex = column - c;
+          }
+          originFound = true;
+          break;
+        }
+      }
+      if (originFound) {
+        break;
+      }
     }
+    // if (
+    //   (row + 1 < playerObject.gameboard.size[1] &&
+    //     playerObject.gameboard.board[row + 1][column] === clickedCell) ||
+    //   (row - 1 >= 0 &&
+    //     playerObject.gameboard.board[row - 1][column] === clickedCell)
+    // ) {
+    //   shipOrientation = "vertical";
+    // }
     playerObject.gameboard.removeShip(clickedCell);
     selectedShip = {
       name: "Ship",
       length: clickedCell.length,
       orientation: shipOrientation,
+      clickIndex: clickIndex,
     };
     console.log(`Picked up ship of length ${selectedShip.length}`);
     updateBoard(playerObject, boardTable);
@@ -158,11 +182,20 @@ function handlePlayerPlacementClick(
     return;
   }
 
-  console.log(
-    `Placing ${selectedShip["name"]}: ${selectedShip["length"]} on [${row}, ${column}], ${selectedShip["orientation"]}`,
-  );
+  // console.log(
+  //   `Placing ${selectedShip["name"]}: ${selectedShip["length"]} on [${row}, ${column}], ${selectedShip["orientation"]}`,
+  // );
+
+  let placeRow = row;
+  let placeCol = column;
+  if (selectedShip.orientation === "horizontal") {
+    placeCol -= selectedShip.clickIndex;
+  } else {
+    placeRow -= selectedShip.clickIndex;
+  }
+
   let result = playerObject.gameboard.placeShip(
-    [row, column],
+    [placeRow, placeCol],
     selectedShip["orientation"],
     selectedShip["length"],
   );
@@ -239,6 +272,7 @@ function addFleetButtons(randomizeCallback) {
         name: FLEET_DEFINITIONS[i]["name"],
         length: FLEET_DEFINITIONS[i]["length"],
         orientation: "horizontal",
+        clickIndex: 0,
       };
       console.log(`Selected ship: ${selectedShip["name"]}`);
     });
@@ -304,8 +338,14 @@ function handleCellMouseover(event) {
 
   clearPreview();
   const currentCell = event.target;
-  const startX = parseInt(currentCell.dataset.x);
-  const startY = parseInt(currentCell.dataset.y);
+  let startX = parseInt(currentCell.dataset.x);
+  let startY = parseInt(currentCell.dataset.y);
+
+  if (selectedShip.orientation === "horizontal") {
+    startX -= selectedShip.clickIndex;
+  } else {
+    startY -= selectedShip.clickIndex;
+  }
 
   const cellsCoords = calculateCells(
     startX,

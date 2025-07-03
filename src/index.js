@@ -41,7 +41,6 @@ function startGame() {
 
 function showStartButton() {
   const fleetButtons = document.querySelectorAll(".fleet-button");
-  // fleetButtons.forEach((btn) => (btn.disabled = true));
   fleetButtons.forEach((btn) => btn.remove());
   createStartButtonOverlay(startGame);
 }
@@ -80,7 +79,6 @@ function handlePlayerAttack(
     !gameActive ||
     currentPlayer.type != "real"
   ) {
-    // Reject attack if it's not the user's turn
     console.log("Not your turn!");
     return;
   }

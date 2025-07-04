@@ -171,7 +171,17 @@ class Gameboard {
   }
 
   placeShipsRandomly() {
-    FLEET_DEFINITIONS.forEach((shipDefinition) => {
+    const placedShipsLength = this.ships.map((ship) => ship.length);
+    const fleetCopy = [...FLEET_DEFINITIONS];
+
+    for (const length of placedShipsLength) {
+      const indexToRemove = fleetCopy.findIndex((def) => def.length === length);
+      if (indexToRemove > -1) {
+        fleetCopy.splice(indexToRemove, 1);
+      }
+    }
+
+    fleetCopy.forEach((shipDefinition) => {
       let placed = false;
       while (!placed) {
         const orientation = Math.random() < 0.5 ? "horizontal" : "vertical";

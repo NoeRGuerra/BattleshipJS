@@ -34,14 +34,17 @@ let gamePhase = "placement";
 let humanPlayerShipsToPlace = FLEET_DEFINITIONS.length;
 
 function startGame() {
+  if (humanPlayerShipsToPlace > 0) {
+    playerOne.gameboard.placeShipsRandomly();
+    updatePlayerOneBoard(playerOne);
+  }
+  console.log(playerOne.gameboard.printBoard());
   removeStartButtonOverlay();
   clearButtons();
   transitionToBattlePhase();
 }
 
 function showStartButton() {
-  const fleetButtons = document.querySelectorAll(".fleet-button");
-  fleetButtons.forEach((btn) => btn.remove());
   createStartButtonOverlay(startGame);
 }
 
@@ -62,10 +65,13 @@ function switchTurns() {
 function handleRandomizeClick() {
   playerOne.gameboard.clear();
   playerOne.gameboard.placeShipsRandomly();
+  const fleetButtons = document.querySelectorAll(".fleet-button");
+  if (fleetButtons) {
+    fleetButtons.forEach((btn) => btn.remove());
+  }
   updatePlayerOneBoard(playerOne);
   updatePlayerOneBoard(playerOne);
   humanPlayerShipsToPlace = 0;
-  showStartButton();
 }
 
 function handlePlayerAttack(
@@ -171,6 +177,7 @@ function resetGame() {
     handleCellMouseover,
     handleShipPlacedCallback,
   );
+  showStartButton();
 }
 
 setPlayersContainers();
@@ -193,3 +200,4 @@ addPlacementListeners(
   handleCellMouseover,
   handleShipPlacedCallback,
 );
+showStartButton();

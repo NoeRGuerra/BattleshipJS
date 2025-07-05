@@ -19,6 +19,9 @@ function setPlayersContainers() {
 }
 
 function createBoard(player, parentContainer, label) {
+  const boardWrapper = document.createElement("div");
+  boardWrapper.classList.add("board-wrapper");
+
   const [width, height] = player.gameboard.size;
   const boardTable = document.createElement("table");
 
@@ -50,7 +53,8 @@ function createBoard(player, parentContainer, label) {
   boardLabel.classList.add("player-label");
   boardLabel.textContent = label;
   parentContainer.appendChild(boardLabel);
-  parentContainer.appendChild(boardTable);
+  boardWrapper.appendChild(boardTable);
+  parentContainer.appendChild(boardWrapper);
   return boardTable;
 }
 
@@ -158,14 +162,6 @@ function handlePlayerPlacementClick(
         break;
       }
     }
-    // if (
-    //   (row + 1 < playerObject.gameboard.size[1] &&
-    //     playerObject.gameboard.board[row + 1][column] === clickedCell) ||
-    //   (row - 1 >= 0 &&
-    //     playerObject.gameboard.board[row - 1][column] === clickedCell)
-    // ) {
-    //   shipOrientation = "vertical";
-    // }
     playerObject.gameboard.removeShip(clickedCell);
     selectedShip = {
       name: "Ship",
@@ -250,12 +246,16 @@ function updateBoard(player, tableElement, isComputerBoard = false) {
 }
 
 function updatePlayerOneBoard(player) {
-  const tableBoard = document.querySelector("#player-one-container>table");
+  const tableBoard = document.querySelector(
+    "#player-one-container .board-wrapper table",
+  );
   return updateBoard(player, tableBoard);
 }
 
 function updatePlayerTwoBoard(player, isComputerBoard) {
-  const tableBoard = document.querySelector("#player-two-container>table");
+  const tableBoard = document.querySelector(
+    "#player-two-container .board-wrapper table",
+  );
   return updateBoard(player, tableBoard, isComputerBoard);
 }
 
@@ -433,6 +433,7 @@ function showGameOverScreen(winnerText, restartCallback) {
   messageBox.classList.add("messageBox");
   const winnerLabel = document.createElement("p");
   winnerLabel.textContent = winnerText;
+  winnerLabel.classList.add("winner-label");
   const restartButton = document.createElement("button");
   restartButton.classList.add("start-button");
   restartButton.textContent = "Restart game";
@@ -458,7 +459,9 @@ function clearButtons() {
 }
 
 function createStartButtonOverlay(startCallback) {
-  const opponentContainer = document.querySelector("#player-two-container");
+  const opponentContainer = document.querySelector(
+    "#player-two-container .board-wrapper",
+  );
   if (opponentContainer.querySelector(".board-overlay")) {
     return;
   }
@@ -472,7 +475,6 @@ function createStartButtonOverlay(startCallback) {
   startButton.addEventListener("click", startCallback);
 
   overlay.appendChild(startButton);
-  opponentContainer.style.position = "relative";
   opponentContainer.appendChild(overlay);
 }
 

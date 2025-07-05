@@ -12,6 +12,7 @@ h1 {
   display: flex;
   gap: 20px;
   justify-content: space-around;
+  align-items: flex-start;
 }
 
 td {
@@ -134,6 +135,10 @@ h1,
   color: #4682a9;
 }
 
+.board-label {
+  font-family: "Courier New", Courier, monospace;
+}
+
 .buttons-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -172,4 +177,16 @@ h1,
 
 .rotate-button:hover {
   background-color: rgb(102, 93, 44);
+}
+
+.winner-label {
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  text-align: center;
+  font-size: 32px;
+}
+
+.board-wrapper {
+  position: relative;
+  display: inline-block;
 }

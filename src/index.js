@@ -106,7 +106,7 @@ function handlePlayerAttack(
 }
 
 function handleComputerAttack() {
-  const result = currentPlayer.makeRandomAttack(opponentPlayer.gameboard);
+  const result = currentPlayer.makeAttack(opponentPlayer.gameboard);
   if (result === "Max attempts reached") {
     console.log("Error, max attempts reached");
     return;

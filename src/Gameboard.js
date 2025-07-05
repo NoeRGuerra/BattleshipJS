@@ -125,6 +125,12 @@ class Gameboard {
     return coord1[0] === coord2[0] && coord1[1] === coord2[1];
   }
 
+  isAlreadyAttacked(coordinates) {
+    return this.attackedCoordinates.some((attackedCoord) =>
+      this.areCoordinatesEqual(attackedCoord, coordinates),
+    );
+  }
+
   receiveAttack(coordinates) {
     const [row, column] = coordinates;
     if (

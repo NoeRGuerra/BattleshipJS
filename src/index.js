@@ -23,6 +23,8 @@ import {
   setBoardClickable,
   createStartButtonOverlay,
   removeStartButtonOverlay,
+  addDarkModeBtn,
+  removeInstructions,
 } from "./domManager";
 
 const playerOne = new Player("real", BOARD_WIDTH, BOARD_HEIGHT);
@@ -40,6 +42,9 @@ function startGame() {
   }
   console.log(playerOne.gameboard.printBoard());
   removeStartButtonOverlay();
+  if (document.querySelector(".instructions")) {
+    removeInstructions();
+  }
   clearButtons();
   transitionToBattlePhase();
 }
@@ -193,6 +198,7 @@ updatePlayerTwoBoard(playerTwo, true);
 addFleetButtons(handleRandomizeClick);
 setupInterface();
 displayPhase(gamePhase);
+displayStatus("Place your ships or click 'random'");
 addPlacementListeners(
   playerOneContainer.querySelector("table"),
   playerOne,
@@ -201,3 +207,4 @@ addPlacementListeners(
   handleShipPlacedCallback,
 );
 showStartButton();
+addDarkModeBtn();

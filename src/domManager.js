@@ -401,7 +401,7 @@ function isValidPlacement(cells) {
 
 function displayPhase(currentPhase) {
   const phaseElement = document.querySelector(".phaseText");
-  phaseElement.textContent = `Current phase: ${currentPhase}`;
+  phaseElement.textContent = `Current phase: ${currentPhase[0].toUpperCase() + currentPhase.slice(1)}`;
 }
 
 function displayStatus(message) {
@@ -413,14 +413,28 @@ function setupInterface() {
   const bodyElement = document.querySelector("body");
   const labelsContainer = document.createElement("div");
   labelsContainer.classList.add("labels");
-  const phaseElement = document.createElement("p");
-  phaseElement.classList.add("phaseText");
-  labelsContainer.appendChild(phaseElement);
 
   const statusLabel = document.createElement("p");
   statusLabel.className = "status-label";
   statusLabel.textContent = "It's your turn";
   labelsContainer.appendChild(statusLabel);
+
+  const phaseElement = document.createElement("p");
+  phaseElement.classList.add("phaseText");
+  labelsContainer.appendChild(phaseElement);
+
+  const instructionsContainer = document.createElement("div");
+  instructionsContainer.classList.add("instructions");
+  const instructions = [
+    "Press Space to rotate the ship you are placing.",
+    "Click on a placed ship to move it to another location.",
+  ];
+  for (let instruction of instructions) {
+    const instructionLabel = document.createElement("p");
+    instructionLabel.textContent = instruction;
+    instructionsContainer.appendChild(instructionLabel);
+  }
+  labelsContainer.appendChild(instructionsContainer);
 
   bodyElement.appendChild(labelsContainer);
 }
@@ -485,6 +499,28 @@ function removeStartButtonOverlay() {
   }
 }
 
+function removeInstructions() {
+  const instructionsContainer = document.querySelector(".instructions");
+  instructionsContainer.remove();
+}
+
+function addDarkModeBtn() {
+  const darkModeBtn = document.createElement("button");
+  darkModeBtn.textContent = "🌙️";
+  darkModeBtn.classList.add("dark-mode-btn");
+  darkModeBtn.addEventListener("click", toggleDarkMode);
+
+  const body = document.querySelector("body");
+  body.appendChild(darkModeBtn);
+}
+
+function toggleDarkMode(event) {
+  const body = document.querySelector("body");
+  body.classList.toggle("dark-mode");
+  const isDarkMode = body.classList.contains("dark-mode");
+  event.target.textContent = isDarkMode ? "☀️" : "🌙️";
+}
+
 export {
   createBoard,
   updatePlayerOneBoard,
@@ -506,4 +542,6 @@ export {
   setBoardClickable,
   createStartButtonOverlay,
   removeStartButtonOverlay,
+  addDarkModeBtn,
+  removeInstructions,
 };
